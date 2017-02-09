@@ -1,3 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>HTML5 Multiplayer Game</title>
+</head>
+<body>
+
+
 <canvas id="ctx" width="500" height="500" style="border: 1px solid #000000;"></canvas>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -17,6 +25,30 @@
 		}
 	});
 
+	// Check for key presses and emit event with package
+	document.onkeydown = function(event) {
+		if(event.keyCode === 68) {//d
+			socket.emit('keyPress', {inputId: 'right', state: true});
+			alert('right');
+		}
+		else if(event.keyCode === 83) //s
+			socket.emit('keyPress', {inputId: 'down', state: true});
+		else if(event.keyCode === 65) //a
+			socket.emit('keyPress', {inputId: 'left', state: true});
+		else if(event.keyCode === 87) //w
+			socket.emit('keyPress', {inputId: 'up', state: true});
+	};
+	document.onkeydown = function(event) {
+		if(event.keyCode === 68) //d
+			socket.emit('keyPress', {inputId: 'right', state: false});
+		else if(event.keyCode === 83) //s
+			socket.emit('keyPress', {inputId: 'down', state: false});
+		else if(event.keyCode === 65) //a
+			socket.emit('keyPress', {inputId: 'left', state: false});
+		else if(event.keyCode === 87) //w
+			socket.emit('keyPress', {inputId: 'up', state: false});
+	};
+
 
 	// Emit a greeting event with data reason and time
 	/*socket.emit('greeting', {
@@ -24,3 +56,7 @@
 		time: '12pm'
 	});*/
 </script>
+
+
+</body>
+</html>
