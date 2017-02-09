@@ -1,0 +1,26 @@
+<canvas id="ctx" width="500" height="500" style="border: 1px solid #000000;"></canvas>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+	var ctx = document.getElementById("ctx").getContext("2d");
+	ctx.font = '30px Arial';
+	// Initialize connection
+	var socket = io();
+
+	// Listen to new position event
+	socket.on('newPosition', function(data) {
+		ctx.clearRect(0,0,500,500);
+
+		for(var i = 0; i < data.length; i++) {
+			ctx.fillText(data[i].number, data[i].x, data[i].y);
+		}
+	});
+
+
+	// Emit a greeting event with data reason and time
+	/*socket.emit('greeting', {
+		reason: 'we just met',
+		time: '12pm'
+	});*/
+</script>
