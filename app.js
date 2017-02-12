@@ -4,9 +4,17 @@ var http = require('http');
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 var mongojs = require('mongojs');
+// Location of database server
+var db = mongojs('localhost:27017/myGame', ['account', 'progress']);
 
 app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/client/index.html');
+});
+app.get('/index.html', function(req, res) {
+	res.sendFile(__dirname + '/client/index.html');
+});
+app.get('/signup.html', function(req, res) {
+	res.sendFile(__dirname + '/client/signup.html');
 });
 app.use('/client', express.static(__dirname + '/client'));
 
@@ -207,20 +215,26 @@ Bullet.update = function() {
 // Contains all players and their username: password pairs
 var USERS = {};
 var isValidPassword  = function(data, cb) {
-	setTimeout(function() {
-		cb(USERS[data.username] === data.password);
-	}, 10);
+	// Find returns an array of every that is true to res
+	db.account.find({username: data.username, password: data.password}, function(err, res) {
+		if(res.length > 0)
+			cb(true);
+		else
+			cb(false);
+	});
 };
 var isUsernameTaken  = function(data, cb) {
-	setTimeout(function() {
-		cb(USERS[data.username]);
-	}, 10);
+	db.account.find({username: data.username}, function(err, res) {
+		if(res.length > 0)
+			cb(true);
+		else
+			cb(false);
+	});
 };
 var addUser = function(data, cb) {
-	setTimeout(function() {
-		USERS[data.username] = data.password;
+	db.account.insert({username: data.username, password: data.password}, function(err) {
 		cb();
-	}, 10);
+	});
 };
 
 // When a user connects, a socket is established

@@ -3,7 +3,7 @@
 	Username: <input id="signDiv-username" type="text"></input><br>
 	Password: <input id="signDiv-password" type="password"></input><br>
 	<button id="signDiv-signIn">Sign In</button>
-	<button id="signDiv-signUp">Sign Up</button>
+	<button id="signDiv-signUp"><a href="signup.html" style="text-decoration: none; color: black;">Sign Up</a></button>
 </div>
 
 <!-- Game -->
@@ -32,9 +32,12 @@
 	$('#signDiv-signIn').click(function() {
 		socket.emit('signIn', {username: signDivUsername.value, password: signDivPassword.value});
 	});
+
+	/*
 	$('#signDiv-signUp').click(function() {
 		socket.emit('signUp', {username: signDivUsername.value, password: signDivPassword.value});
 	});
+	*/
 	socket.on('signInResponse', function(data) {
 		if(data.success) {
 			$('#signDiv').css('display', 'none');

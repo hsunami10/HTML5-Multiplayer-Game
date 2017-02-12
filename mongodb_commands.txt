@@ -1,4 +1,4 @@
-database
+﻿database
 	collection1
 		document1
 		document2
@@ -7,6 +7,8 @@ database
 		document1
 		document2
 
+mongo -> run query
+mongod -> run database server
 
 Create database:
 use <database_name>;
@@ -14,12 +16,11 @@ use <database_name>;
 Create collection (table):
 db.createCollection("<collection_name>");
 
-Create document:
+Create document: (returns err)
 db.<collection_name>.insert({<data in js>});
 	ex. db.account.insert({username: bob, password: pass});
 
-Read document:
-
+Read document: (returns err and res)
 db.<collection_name>.find(<property>);
 	ex. db.account.find({username: bob}); -> find all accounts with username bob
 db.<collection_name>.find(<property>, <specific_property>);

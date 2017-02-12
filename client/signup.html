@@ -1,0 +1,30 @@
+<div id="signDiv">
+	Username: <input id="signDiv-username" type="text"></input><br>
+	Password: <input id="signDiv-password" type="password"></input><br>
+	Retype password: <input id="signDiv-repassword" type="password"></input><br>
+	<button id="signDiv-signUp"><a href="/" style="color: black; text-decoration: none;">Sign Up</a></button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<script>
+	var socket = io();
+
+	var signDivUsername = document.getElementById('signDiv-username');
+	var signDivPassword = document.getElementById('signDiv-password');
+	var signDivRePassword = document.getElementById('signDiv-repassword');
+
+	$('#signDiv-signUp').click(function() {
+		if(signDivPassword.value === '' || signDivRePassword.value === '' || signDivUsername.value === '') {
+			alert('Can\'t have empty inputs');
+		}
+
+		if(signDivPassword.value === signDivRePassword.value) {
+			socket.emit('signUp', {username: signDivUsername.value, password: signDivPassword.value});
+		}
+		else {
+			alert('Passwords do not match');
+		}
+	});
+</script>
