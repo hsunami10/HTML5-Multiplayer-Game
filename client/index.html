@@ -1,44 +1,111 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>HTML5 Multiplayer Game</title>
-</head>
-<body>
+<!-- Sign In System -->
+<div id="signDiv">
+	Username: <input id="signDiv-username" type="text"></input><br>
+	Password: <input id="signDiv-password" type="password"></input><br>
+	<button id="signDiv-signIn">Sign In</button>
+	<button id="signDiv-signUp">Sign Up</button>
+</div>
 
+<!-- Game -->
+<div id="gameDiv" style="display: none;">
+	<canvas id="ctx" width="500" height="500" style="border: 1px solid #000000;"></canvas>
 
-<canvas id="ctx" width="500" height="500" style="border: 1px solid #000000;"></canvas>
+	<div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll;"></div>
+
+	<form id="chat-form">
+		<input id="chat-input" type="text" style="width: 500px"></input>
+	</form>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 
 <script>
-	var ctx = document.getElementById("ctx").getContext("2d");
-	ctx.font = '30px Arial';
 	// Initialize connection
 	var socket = io();
 
-	// Listen to new position event
+
+	// Sign in
+	var signDivUsername = document.getElementById("signDiv-username");
+	var signDivPassword = document.getElementById("signDiv-password");
+	
+	$('#signDiv-signIn').click(function() {
+		socket.emit('signIn', {username: signDivUsername.value, password: signDivPassword.value});
+	});
+	$('#signDiv-signUp').click(function() {
+		socket.emit('signUp', {username: signDivUsername.value, password: signDivPassword.value});
+	});
+	socket.on('signInResponse', function(data) {
+		if(data.success) {
+			$('#signDiv').css('display', 'none');
+			$('#gameDiv').css('display', 'inline-block');
+		}
+		else
+			alert('Sign in unsuccessful');
+	});
+	socket.on('signUpResponse', function(data) {
+		if(data.success) {
+			alert('Sign up successful');
+		}
+		else
+			alert('Sign up unsuccessful');
+	});
+
+
+	// Game
+	var chatText = document.getElementById("chat-text");
+	var chatInput = document.getElementById("chat-input");
+	var chatForm = document.getElementById("chat-form");
+	var ctx = document.getElementById("ctx").getContext("2d");
+
+	ctx.font = '30px Arial';
+
+	// Handle chat events
+	socket.on('addToChat', function(data) {
+		chatText.innerHTML += '<div>' + data + '</div>';
+	});
+
+	// Submit form
+	chatForm.onsubmit = function(e) {
+		e.preventDefault(); // Stops from refreshing page
+		
+		// Debug
+		/*if(chatInput.value[0] === '/')
+			socket.emit('evalServer', chatInput.value.slice(1));
+		else*/
+		if(chatInput.value.substring(0, 6) == '/tell ')
+			socket.emit('sendPrivateMsg', {user: chatInput.value.substring(6, 11), msg: chatInput.value.substring(12)});
+		else
+			socket.emit('sendMsgToServer', chatInput.value);
+		chatInput.value = '';
+		chatText.scrollTop = chatText.scrollHeight;
+	};
+
+	// Draw all player positions
 	socket.on('newPosition', function(data) {
 		ctx.clearRect(0,0,500,500);
 
-		for(var i = 0; i < data.length; i++) {
-			ctx.fillText(data[i].number, data[i].x, data[i].y);
+		for(var i = 0; i < data.player.length; i++) {
+			ctx.fillText(data.player[i].number, data.player[i].x, data.player[i].y);
+		}
+		for(var a = 0; a < data.bullet.length; a++) {
+			ctx.fillRect(data.bullet[a].x-5, data.bullet[a].y-5,10,10);
 		}
 	});
 
-	// Check for key presses and emit event with package
-	document.onkeydown = function(event) {
-		if(event.keyCode === 68) {//d
+	// Key handling
+	$(document).keydown(function(event) {
+		if(event.keyCode == 68) //d
 			socket.emit('keyPress', {inputId: 'right', state: true});
-			alert('right');
-		}
 		else if(event.keyCode === 83) //s
 			socket.emit('keyPress', {inputId: 'down', state: true});
 		else if(event.keyCode === 65) //a
 			socket.emit('keyPress', {inputId: 'left', state: true});
 		else if(event.keyCode === 87) //w
 			socket.emit('keyPress', {inputId: 'up', state: true});
-	};
-	document.onkeydown = function(event) {
+	});
+
+	$(document).keyup(function(event) {
 		if(event.keyCode === 68) //d
 			socket.emit('keyPress', {inputId: 'right', state: false});
 		else if(event.keyCode === 83) //s
@@ -47,16 +114,28 @@
 			socket.emit('keyPress', {inputId: 'left', state: false});
 		else if(event.keyCode === 87) //w
 			socket.emit('keyPress', {inputId: 'up', state: false});
-	};
+	});
 
+	// Mouse handling
+	$(document).mousedown(function(event) {
+		socket.emit('keyPress', {inputId: 'attack', state: true});
+	});
+	$(document).mouseup(function(event) {
+		socket.emit('keyPress', {inputId: 'attack', state: false});
+	});
+	$(document).mousemove(function(event) {
+		// Sets mouse position relative to center
+		var x = -250 + event.pageX - 8;
+		var y = -250 + event.pageY - 8;
+		var adjust = 0;
 
-	// Emit a greeting event with data reason and time
-	/*socket.emit('greeting', {
-		reason: 'we just met',
-		time: '12pm'
-	});*/
+		if(x < 0 && y > 0)
+			adjust = 180;
+		else if(x < 0 && y < 0)
+			adjust = -180;
+
+		var angle = Math.atan(y/x) / Math.PI * 180 + adjust;
+		socket.emit('keyPress', {inputId: 'mouseAngle', state: angle});
+	});
+
 </script>
-
-
-</body>
-</html>
