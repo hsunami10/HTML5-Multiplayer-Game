@@ -1,0 +1,30 @@
+database
+	collection1
+		document1
+		document2
+		document3
+	collection2
+		document1
+		document2
+
+
+Create database:
+use <database_name>;
+
+Create collection (table):
+db.createCollection("<collection_name>");
+
+Create document:
+db.<collection_name>.insert({<data in js>});
+	ex. db.account.insert({username: bob, password: pass});
+
+Read document:
+
+db.<collection_name>.find(<property>);
+	ex. db.account.find({username: bob}); -> find all accounts with username bob
+db.<collection_name>.find(<property>, <specific_property>);
+	ex. db.account.find({username: bob}, {level:1}) -> find all bob’s levels
+
+Update document:
+db.<collection_name>.update(<property>, {$set: <new_values>});
+	ex. db.progress.update({username: "bob"}, {$set: {level: 99});
