@@ -23,6 +23,8 @@
 <script>
 	// Initialize connection
 	var socket = io();
+	var x = 0;
+	var y = 0;
 
 	// Sign in
 	var signDivUsername = document.getElementById("signDiv-username");
@@ -99,6 +101,7 @@
 
 		for(var i = 0; i < data.player.length; i++) {
 			ctx.fillText(data.player[i].number, data.player[i].x, data.player[i].y);
+
 		}
 		for(var a = 0; a < data.bullet.length; a++) {
 			ctx.fillRect(data.bullet[a].x-5, data.bullet[a].y-5,10,10);
@@ -136,9 +139,13 @@
 		socket.emit('keyPress', {inputId: 'attack', state: false});
 	});
 	$(document).mousemove(function(event) {
-		// Sets mouse position relative to center
-		var x = -250 + event.pageX - 8;
-		var y = -250 + event.pageY - 8;
+
+		// Distance relative to player position
+		socket.on('position', function(data) {
+			x = -data.x + event.pageX;
+			y = -data.y + event.pageY;
+		});
+
 		var adjust = 0;
 
 		if(x < 0 && y > 0)

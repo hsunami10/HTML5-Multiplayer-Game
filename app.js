@@ -27,6 +27,7 @@ console.log('Server started');
 
 // List of sockets
 var SOCKET_LIST = {};
+var socketID = 0;
 
 // Object that holds general properties - Entity "constructor"
 var Entity = function() {
@@ -86,7 +87,7 @@ var Player = function(id, username) {
 		}
 	};
 	self.shootBullet = function(angle) {
-		if(self.attackCooldown % 20 === 0) {
+		if(self.attackCooldown % 15 === 0) {
 			var bullet = Bullet(self.id, angle);
 			bullet.x = self.x;
 			bullet.y = self.y;
@@ -245,6 +246,7 @@ io.on('connection', function(socket) {
 	// Assign a unique id to socket AND player
 	socket.id = Math.random();
 	SOCKET_LIST[socket.id] = socket;
+	socketID = socket.id;
 
 	// Sign in
 	socket.on('signIn', function(data) {
@@ -266,9 +268,8 @@ io.on('connection', function(socket) {
 	// Sign up
 	socket.on('signUp', function(data) {
 		isUsernameTaken(data, function(res) {
-			if(res) {
+			if(res)
 				socket.emit('signUpResponse', {success: false});
-			}
 			else {
 				addUser(data, function(){
 					socket.emit('signUpResponse', {success: true});
@@ -324,6 +325,13 @@ setInterval(function() {
 	for(var i in SOCKET_LIST) {
 		var socket = SOCKET_LIST[i];
 		socket.emit('newPosition', pack);
+	}
+
+	// Send current player position to its own player
+	for(var a in Player.list) {
+		var sockets = SOCKET_LIST[a];
+		if(a == socketID)
+			sockets.emit('position', {x: Player.list[a].x, y: Player.list[a].y});
 	}
 
 }, 1000/50);
