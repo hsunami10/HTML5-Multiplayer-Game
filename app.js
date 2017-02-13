@@ -285,7 +285,7 @@ io.on('connection', function(socket) {
 			var playerName = Player.list[i].username;
 			if(playerName == data.user) {
 				SOCKET_LIST[i].emit('addToChat', Player.list[socket.id].username + '[private]: ' + data.msg);
-				socket.emit('addToChat', Player.list[socket.id] + '[private]: ' + data.msg);
+				socket.emit('addToChat', Player.list[socket.id].username + '[private]: ' + data.msg);
 			}
 		}
 	});

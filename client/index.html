@@ -30,14 +30,12 @@
 	var signDivPassword = document.getElementById("signDiv-password");
 	
 	$('#signDiv-signIn').click(function() {
-		socket.emit('signIn', {username: signDivUsername.value, password: signDivPassword.value});
+		if(signDivUsername.value === '' || signDivPassword.value === '')
+			alert('Invalid username and/or password');
+		else
+			socket.emit('signIn', {username: signDivUsername.value, password: signDivPassword.value});
 	});
 
-	/*
-	$('#signDiv-signUp').click(function() {
-		socket.emit('signUp', {username: signDivUsername.value, password: signDivPassword.value});
-	});
-	*/
 	socket.on('signInResponse', function(data) {
 		if(data.success) {
 			$('#signDiv').css('display', 'none');
