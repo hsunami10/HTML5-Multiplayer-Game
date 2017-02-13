@@ -51,7 +51,7 @@ var Entity = function() {
 };
 
 // Add more specific player properties - Player "constructor"
-var Player = function(id) {
+var Player = function(id, username) {
 	var self = Entity();
 	self.id = id;
 	self.number = "" + Math.floor(10 * Math.random());
@@ -63,6 +63,7 @@ var Player = function(id) {
 	self.mouseAngle = 0;
 	self.maxSpd = 8;
 	self.attackCooldown = 0;
+	self.username = username;
 
 	// Copy of original update function, override
 	var super_update = self.update;
@@ -117,9 +118,9 @@ Player.list = {};
 
 // Static function
 // Separate player from socket
-Player.onConnect = function(socket) {
+Player.onConnect = function(socket, username) {
 	// Create player with id, add to list
-	var player = Player(socket.id);
+	var player = Player(socket.id, username);
 
 	// Handle key press event
 	socket.on('keyPress', function(data) {
@@ -249,7 +250,7 @@ io.on('connection', function(socket) {
 	socket.on('signIn', function(data) {
 		isValidPassword(data, function(res) {
 			if(res) {
-				Player.onConnect(socket);
+				Player.onConnect(socket, data.username);
 				socket.emit('signInResponse', {success: true});
 			}
 			else
@@ -273,7 +274,7 @@ io.on('connection', function(socket) {
 
 	// Chat events
 	socket.on('sendMsgToServer', function(msg) {
-		var playerName = ("" + socket.id).slice(2, 7);
+		var playerName = Player.list[socket.id].username;
 		// Loop through every socket and send to every socket
 		for(var i in SOCKET_LIST) {
 			SOCKET_LIST[i].emit('addToChat', playerName + '[global]: ' + msg);
@@ -281,10 +282,10 @@ io.on('connection', function(socket) {
 	});
 	socket.on('sendPrivateMsg', function(data) {
 		for(var i in SOCKET_LIST) {
-			var playerName = ("" + SOCKET_LIST[i].id).slice(2, 7);
+			var playerName = Player.list[i].username;
 			if(playerName == data.user) {
-				SOCKET_LIST[i].emit('addToChat', ("" + socket.id).slice(2,7) + '[private]: ' + data.msg);
-				socket.emit('addToChat', ("" + socket.id).slice(2,7) + '[private]: ' + data.msg);
+				SOCKET_LIST[i].emit('addToChat', Player.list[socket.id].username + '[private]: ' + data.msg);
+				socket.emit('addToChat', Player.list[socket.id] + '[private]: ' + data.msg);
 			}
 		}
 	});
