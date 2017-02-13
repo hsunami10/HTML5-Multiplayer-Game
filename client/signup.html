@@ -18,9 +18,7 @@
 	$('#signDiv-signUp').click(function() {
 		if(signDivPassword.value === '' || signDivRePassword.value === '' || signDivUsername.value === '') {
 			alert('Can\'t have empty inputs');
-		}
-
-		if(signDivPassword.value === signDivRePassword.value) {
+		} else if(signDivPassword.value === signDivRePassword.value) {
 			socket.emit('signUp', {username: signDivUsername.value, password: signDivPassword.value});
 		}
 		else {

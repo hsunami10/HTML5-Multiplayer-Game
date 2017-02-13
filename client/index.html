@@ -24,7 +24,6 @@
 	// Initialize connection
 	var socket = io();
 
-
 	// Sign in
 	var signDivUsername = document.getElementById("signDiv-username");
 	var signDivPassword = document.getElementById("signDiv-password");
@@ -49,7 +48,7 @@
 			alert('Sign up successful');
 		}
 		else
-			alert('Sign up unsuccessful');
+			alert('Username has been taken');
 	});
 
 
@@ -65,19 +64,23 @@
 	socket.on('addToChat', function(data) {
 		chatText.innerHTML += '<div>' + data + '</div>';
 	});
+	socket.on('connectMessage', function(data) {
+		chatText.innerHTML += '<div>' + data.name + ' has joined the game.' + '</div>';
+	});
+	socket.on('disconnectMessage', function(data) {
+		chatText.innerHTML += '<div>' + data.name + ' has left the game.' + '</div>';
+	});
+	socket.on('connectMessagePersonal', function(data) {
+		chatText.innerHTML += '<div>' + 'Welcome ' + data.name + '!\nType /tell [username] [message] to send a private message.</div>';
+	});
 
 	// Submit form
 	chatForm.onsubmit = function(e) {
 		e.preventDefault(); // Stops from refreshing page
 		
-		// Debug
-		/*if(chatInput.value[0] === '/')
-			socket.emit('evalServer', chatInput.value.slice(1));
-		else*/
-		
 		var array = chatInput.value.split(" ");
 		
-		if(chatInput.value.substring(0, 6) == '/tell ') {
+		if(array[0] == '/tell') {
 			var startIndex = array[0].length + 2 + array[1].length;
 			socket.emit('sendPrivateMsg', {user: array[1], msg: chatInput.value.substring(startIndex)});
 		}

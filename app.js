@@ -252,6 +252,11 @@ io.on('connection', function(socket) {
 			if(res) {
 				Player.onConnect(socket, data.username);
 				socket.emit('signInResponse', {success: true});
+				for(var i in SOCKET_LIST)
+					if(i != socket.id)
+						SOCKET_LIST[i].emit('connectMessage', {name: Player.list[socket.id].username});
+					else
+						socket.emit('connectMessagePersonal', {name: Player.list[socket.id].username});
 			}
 			else
 				socket.emit('signInResponse', {success: false});
@@ -281,7 +286,7 @@ io.on('connection', function(socket) {
 		}
 	});
 	socket.on('sendPrivateMsg', function(data) {
-		for(var i in SOCKET_LIST) {
+		for(var i in Player.list) {
 			var playerName = Player.list[i].username;
 			if(playerName == data.user) {
 				SOCKET_LIST[i].emit('addToChat', Player.list[socket.id].username + '[private]: ' + data.msg);
@@ -292,6 +297,12 @@ io.on('connection', function(socket) {
 
 	// Disconnect event
 	socket.on('disconnect', function() {
+		// Check for exiting in sign in / sign up screen
+		if(typeof Player.list[socket.id] != 'undefined') {
+			for(var i in SOCKET_LIST) {
+				SOCKET_LIST[i].emit('disconnectMessage', {name: Player.list[socket.id].username});
+			}
+		}
 		delete SOCKET_LIST[socket.id];
 		Player.onDisconnect(socket);
 		console.log('User (socket) disconnected');
