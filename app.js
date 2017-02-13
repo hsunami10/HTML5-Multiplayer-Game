@@ -286,13 +286,17 @@ io.on('connection', function(socket) {
 		}
 	});
 	socket.on('sendPrivateMsg', function(data) {
+		var doesNotExist = true;
 		for(var i in Player.list) {
 			var playerName = Player.list[i].username;
 			if(playerName == data.user) {
+				doesNotExist = false;
 				SOCKET_LIST[i].emit('addToChat', Player.list[socket.id].username + '[private]: ' + data.msg);
 				socket.emit('addToChat', Player.list[socket.id].username + '[private]: ' + data.msg);
 			}
 		}
+		if(doesNotExist)
+			socket.emit('doesNotExist', data.user);
 	});
 
 	// Disconnect event

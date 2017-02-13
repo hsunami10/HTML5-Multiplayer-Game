@@ -73,6 +73,9 @@
 	socket.on('connectMessagePersonal', function(data) {
 		chatText.innerHTML += '<div>' + 'Welcome ' + data.name + '!\nType /tell [username] [message] to send a private message.</div>';
 	});
+	socket.on('doesNotExist', function(data) {
+		chatText.innerHTML += '<div>' + data + ' does not exist.</div>';
+	});
 
 	// Submit form
 	chatForm.onsubmit = function(e) {
